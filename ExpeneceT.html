@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Expense Tracker</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        
+        .expense-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .expense-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .category-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .category-food { background: linear-gradient(45deg, #ff6b6b, #ee5a24); }
+        .category-transport { background: linear-gradient(45deg, #4834d4, #686de0); }
+        .category-books { background: linear-gradient(45deg, #00d2d3, #54a0ff); }
+        .category-entertainment { background: linear-gradient(45deg, #ff9ff3, #f368e0); }
+        .category-clothes { background: linear-gradient(45deg, #feca57, #ff9f43); }
+        .category-other { background: linear-gradient(45deg, #48dbfb, #0abde3); }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .form-control {
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            transform: scale(1.02);
+        }
+        
+        .total-amount {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .delete-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .delete-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+        
+        .progress-bar {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .category-filter {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .category-filter:hover, .category-filter.active {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="text-center mb-5">
+            <h1 class="text-white display-4 fw-bold mb-3">
+                <i class="fas fa-wallet me-3"></i>Student Expense Tracker
+            </h1>
+            <p class="text-white-50 lead">Track your spending like a pro student!</p>
+        </div>
+        
+        <!-- Main Dashboard -->
+        <div class="row">
+            <!-- Left Panel - Add Expense -->
+            <div class="col-lg-4 mb-4">
+                <div class="glass-card p-4 h-100">
+                    <h3 class="text-white mb-4">
+                        <i class="fas fa-plus-circle me-2"></i>Add Expense
+                    </h3>
+                    
+                    <form id="expenseForm">
+                        <div class="mb-3">
+                            <label class="form-label text-white">Description</label>
+                            <input type="text" class="form-control" id="description" placeholder="What did you spend on?" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-white">Amount ($)</label>
+                            <input type="number" class="form-control" id="amount" placeholder="0.00" step="0.01" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-white">Category</label>
+                            <select class="form-control" id="category" required>
+                                <option value="">Select Category</option>
+                                <option value="food">🍕 Food & Drinks</option>
+                                <option value="transport">🚌 Transport</option>
+                                <option value="books">📚 Books & Supplies</option>
+                                <option value="entertainment">🎮 Entertainment</option>
+                                <option value="clothes">👕 Clothes</option>
+                                <option value="other">📦 Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-white">Date</label>
+                            <input type="date" class="form-control" id="date" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-plus me-2"></i>Add Expense
+                        </button>
+                    </form>
+                    
+                    <!-- Total Amount Display -->
+                    <div class="text-center mt-4 p-3" style="background: rgba(255,255,255,0.1); border-radius: 15px;">
+                        <p class="text-white-50 mb-1">Total Spent</p>
+                        <div class="total-amount" id="totalAmount">$0.00</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Panel - Expense List -->
+            <div class="col-lg-8">
+                <!-- Filter Buttons -->
+                <div class="mb-4 text-center">
+                    <button class="btn category-filter active me-2 mb-2" data-filter="all">
+                        <i class="fas fa-list me-1"></i>All
+                    </button>
+                    <button class="btn category-filter me-2 mb-2" data-filter="food">
+                        🍕 Food
+                    </button>
+                    <button class="btn category-filter me-2 mb-2" data-filter="transport">
+                        🚌 Transport
+                    </button>
+                    <button class="btn category-filter me-2 mb-2" data-filter="books">
+                        📚 Books
+                    </button>
+                    <button class="btn category-filter me-2 mb-2" data-filter="entertainment">
+                        🎮 Entertainment
+                    </button>
+                    <button class="btn category-filter me-2 mb-2" data-filter="clothes">
+                        👕 Clothes
+                    </button>
+                    <button class="btn category-filter mb-2" data-filter="other">
+                        📦 Other
+                    </button>
+                </div>
+                
+                <!-- Expense List -->
+                <div id="expenseList" class="row">
+                    <!-- Expenses will be dynamically added here -->
+                </div>
+                
+                <!-- Empty State -->
+                <div id="emptyState" class="text-center py-5">
+                    <div class="glass-card p-5">
+                        <i class="fas fa-receipt text-white-50" style="font-size: 4rem;"></i>
+                        <h4 class="text-white mt-3">No expenses yet!</h4>
+                        <p class="text-white-50">Start tracking your expenses by adding your first entry.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Statistics Section -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="glass-card p-4">
+                    <h3 class="text-white mb-4">
+                        <i class="fas fa-chart-bar me-2"></i>Spending by Category
+                    </h3>
+                    <div id="categoryStats" class="row">
+                        <!-- Category statistics will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        class ExpenseTracker {
+            constructor() {
+                this.expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+                this.currentFilter = 'all';
+                this.init();
+            }
+            
+            init() {
+                this.bindEvents();
+                this.setDefaultDate();
+                this.renderExpenses();
+                this.updateTotal();
+                this.updateCategoryStats();
+            }
+            
+            bindEvents() {
+                document.getElementById('expenseForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.addExpense();
+                });
+                
+                // Filter buttons
+                document.querySelectorAll('.category-filter').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.setFilter(e.target.dataset.filter);
+                    });
+                });
+            }
+            
+            setDefaultDate() {
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('date').value = today;
+            }
+            
+            addExpense() {
+                const description = document.getElementById('description').value;
+                const amount = parseFloat(document.getElementById('amount').value);
+                const category = document.getElementById('category').value;
+                const date = document.getElementById('date').value;
+                
+                const expense = {
+                    id: Date.now(),
+                    description,
+                    amount,
+                    category,
+                    date,
+                    timestamp: new Date().toISOString()
+                };
+                
+                this.expenses.unshift(expense);
+                this.saveToStorage();
+                this.renderExpenses();
+                this.updateTotal();
+                this.updateCategoryStats();
+                this.resetForm();
+                
+                // Show success animation
+                this.showNotification('Expense added successfully!', 'success');
+            }
+            
+            deleteExpense(id) {
+                this.expenses = this.expenses.filter(expense => expense.id !== id);
+                this.saveToStorage();
+                this.renderExpenses();
+                this.updateTotal();
+                this.updateCategoryStats();
+                this.showNotification('Expense deleted!', 'danger');
+            }
+            
+            setFilter(filter) {
+                this.currentFilter = filter;
+                
+                // Update active button
+                document.querySelectorAll('.category-filter').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+                
+                this.renderExpenses();
+            }
+            
+            getFilteredExpenses() {
+                if (this.currentFilter === 'all') {
+                    return this.expenses;
+                }
+                return this.expenses.filter(expense => expense.category === this.currentFilter);
+            }
+            
+            renderExpenses() {
+                const expenseList = document.getElementById('expenseList');
+                const emptyState = document.getElementById('emptyState');
+                const filteredExpenses = this.getFilteredExpenses();
+                
+                if (filteredExpenses.length === 0) {
+                    expenseList.innerHTML = '';
+                    emptyState.style.display = 'block';
+                    return;
+                }
+                
+                emptyState.style.display = 'none';
+                
+                expenseList.innerHTML = filteredExpenses.map(expense => `
+                    <div class="col-md-6 mb-3 fade-in">
+                        <div class="expense-card p-3">
+                            <div class="d-flex align-items-center">
+                                <div class="category-icon category-${expense.category} me-3">
+                                    ${this.getCategoryIcon(expense.category)}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 fw-bold">${expense.description}</h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>${this.formatDate(expense.date)}
+                                    </small>
+                                </div>
+                                <div class="text-end">
+                                    <div class="h5 mb-1 fw-bold text-danger">$${expense.amount.toFixed(2)}</div>
+                                    <button class="delete-btn" onclick="tracker.deleteExpense(${expense.id})">
+                                        <i class="fas fa-trash text-white"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            getCategoryIcon(category) {
+                const icons = {
+                    food: '<i class="fas fa-utensils"></i>',
+                    transport: '<i class="fas fa-bus"></i>',
+                    books: '<i class="fas fa-book"></i>',
+                    entertainment: '<i class="fas fa-gamepad"></i>',
+                    clothes: '<i class="fas fa-tshirt"></i>',
+                    other: '<i class="fas fa-box"></i>'
+                };
+                return icons[category] || icons.other;
+            }
+            
+            formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+            }
+            
+            updateTotal() {
+                const total = this.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+                document.getElementById('totalAmount').textContent = `$${total.toFixed(2)}`;
+            }
+            
+            updateCategoryStats() {
+                const categoryTotals = {};
+                const categoryNames = {
+                    food: 'Food & Drinks',
+                    transport: 'Transport',
+                    books: 'Books & Supplies',
+                    entertainment: 'Entertainment',
+                    clothes: 'Clothes',
+                    other: 'Other'
+                };
+                
+                // Initialize categories
+                Object.keys(categoryNames).forEach(cat => {
+                    categoryTotals[cat] = 0;
+                });
+                
+                // Calculate totals
+                this.expenses.forEach(expense => {
+                    categoryTotals[expense.category] += expense.amount;
+                });
+                
+                const totalSpent = Object.values(categoryTotals).reduce((sum, amount) => sum + amount, 0);
+                const statsContainer = document.getElementById('categoryStats');
+                
+                if (totalSpent === 0) {
+                    statsContainer.innerHTML = '<div class="col-12 text-center text-white-50">No spending data available</div>';
+                    return;
+                }
+                
+                statsContainer.innerHTML = Object.entries(categoryTotals)
+                    .filter(([_, amount]) => amount > 0)
+                    .map(([category, amount]) => {
+                        const percentage = (amount / totalSpent * 100).toFixed(1);
+                        return `
+                            <div class="col-md-6 mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="category-icon category-${category} me-3" style="width: 30px; height: 30px; font-size: 14px;">
+                                        ${this.getCategoryIcon(category)}
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between">
+                                            <span class="text-white">${categoryNames[category]}</span>
+                                            <span class="text-white fw-bold">$${amount.toFixed(2)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="progress" style="height: 8px; background: rgba(255,255,255,0.2);">
+                                    <div class="progress-bar" style="width: ${percentage}%"></div>
+                                </div>
+                                <small class="text-white-50">${percentage}% of total spending</small>
+                            </div>
+                        `;
+                    }).join('');
+            }
+            
+            resetForm() {
+                document.getElementById('expenseForm').reset();
+                this.setDefaultDate();
+            }
+            
+            saveToStorage() {
+                localStorage.setItem('expenses', JSON.stringify(this.expenses));
+            }
+            
+            showNotification(message, type) {
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.className = `alert alert-${type} position-fixed`;
+                notification.style.cssText = `
+                    top: 20px;
+                    right: 20px;
+                    z-index: 9999;
+                    min-width: 300px;
+                    animation: slideIn 0.3s ease-out;
+                `;
+                notification.innerHTML = `
+                    <i class="fas fa-check-circle me-2"></i>${message}
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Remove after 3 seconds
+                setTimeout(() => {
+                    notification.style.animation = 'fadeOut 0.3s ease-out';
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 3000);
+            }
+        }
+        
+        // Initialize the expense tracker
+        const tracker = new ExpenseTracker();
+        
+        // Add some sample data for demo (remove this in production)
+        if (tracker.expenses.length === 0) {
+            const sampleExpenses = [
+                {
+                    id: 1,
+                    description: "Lunch at cafeteria",
+                    amount: 12.50,
+                    category: "food",
+                    date: "2024-01-15",
+                    timestamp: new Date().toISOString()
+                },
+                {
+                    id: 2,
+                    description: "Bus fare",
+                    amount: 3.25,
+                    category: "transport",
+                    date: "2024-01-15",
+                    timestamp: new Date().toISOString()
+                },
+                {
+                    id: 3,
+                    description: "Textbook",
+                    amount: 89.99,
+                    category: "books",
+                    date: "2024-01-14",
+                    timestamp: new Date().toISOString()
+                }
+            ];
+            
+            tracker.expenses = sampleExpenses;
+            tracker.saveToStorage();
+            tracker.renderExpenses();
+            tracker.updateTotal();
+            tracker.updateCategoryStats();
+        }
+    </script>
+</body>
+</html>
